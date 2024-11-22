@@ -81,10 +81,10 @@ jobs:
           aws-region: ${{ env.REGION }}
 
       - name: Configure AWS CLI for kubectl
-        if: steps.plan.outcome == "success" # Automatically uses success of previous steps
+        if: steps.plan.outcome == 'success' # Automatically uses success of previous steps
         id: kubeconfig
         run: aws eks --region ${{ env.REGION }} update-kubeconfig --name ${{ env.EKS_CLUSTER }}
 
       - name: Download and install the ingress controller
-        if: steps.plan.outcome == "success" && steps.kubeconfig.outcome == 'success'
+        if: steps.plan.outcome == 'success' && steps.kubeconfig.outcome == 'success'
         run: kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/aws/deploy.yaml
