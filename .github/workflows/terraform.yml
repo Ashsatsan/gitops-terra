@@ -1,13 +1,13 @@
 name: "GitOps Terraform"
 
 on:
-  workflow_dispatch:
   push:
     branches:
       - main
       - stage
     paths:
       - terraform/**
+  workflow_dispatch:
   pull_request:
     branches:
       - main
