@@ -83,8 +83,18 @@ jobs:
       - name: Configure AWS CLI for kubectl
         if: steps.plan.outcome == 'success' # Automatically uses success of previous steps
         id: kubeconfig
-        run: aws eks --region ${{ env.REGION }} update-kubeconfig --name ${{ env.EKS_CLUSTER }}
+        run: |
+          if [ $GITHUB_REF == "refs/heads/main" ]; then
+            aws eks --region ${{ env.REGION }} update-kubeconfig --name ${{ env.EKS_CLUSTER }}
+          else
+            echo "Skipping EKS kubectl configuration on non-main branch"
+          fi
 
       - name: Download and install the ingress controller
         if: steps.plan.outcome == 'success' && steps.kubeconfig.outcome == 'success'
-        run: kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/aws/deploy.yaml
+        run: |
+          if [ $GITHUB_REF == "refs/heads/main" ]; then
+            kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/aws/deploy.yaml
+          else
+            echo "Skipping ingress controller installation on non-main branch"
+          fi
