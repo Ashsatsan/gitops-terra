@@ -1,6 +1,7 @@
 name: "GitOps Terraform"
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - main
