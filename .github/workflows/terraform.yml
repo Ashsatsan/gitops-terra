@@ -15,7 +15,7 @@ env:
   AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
   BUCKET_TF_STATE: ${{ secrets.BUCKET_TF_STATE }}
   REGISTRY: ${{ secrets.REGISTRY }}
-  EKS_CLUSTER: project1
+  EKS_CLUSTER: vprofile1-eks
   REGION: us-east-2
 
 jobs:
