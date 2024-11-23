@@ -75,6 +75,17 @@ jobs:
           fi
         if: success()
 
+      - name: Terraform destroy (optional step to destroy resources)
+        id: destroy
+        run: |
+          if [ $GITHUB_REF == "refs/heads/main" ] && [ $GITHUB_EVENT_NAME == "workflow_dispatch" ]; then
+            echo "Running terraform destroy"
+            terraform destroy -auto-approve
+          else
+            echo "Skipping destroy on non-main branch or non-manual trigger"
+          fi
+        if: success()
+
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
