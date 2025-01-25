@@ -8,8 +8,8 @@ resource "aws_iam_policy" "ecr_eks_argocd_access" {
     Version = "2012-10-17"
     Statement = [
       {
-        Effect = "Allow"
-        Action = [
+        Effect   = "Allow"
+        Action   = [
           # ECR full access permissions
           "ecr:GetAuthorizationToken",
           "ecr:BatchCheckLayerAvailability",
@@ -29,8 +29,8 @@ resource "aws_iam_policy" "ecr_eks_argocd_access" {
         Resource = "*"
       },
       {
-        Effect = "Allow"
-        Action = [
+        Effect   = "Allow"
+        Action   = [
           # EKS cluster management
           "eks:DescribeCluster",
           "eks:ListClusters",
@@ -52,26 +52,42 @@ resource "aws_iam_policy" "ecr_eks_argocd_access" {
         Resource = "*"
       },
       {
-        Effect = "Allow"
-        Action = [
-          # IAM permissions for EKS
+        Effect   = "Allow"
+        Action   = [
+          # IAM permissions for EKS and ArgoCD
           "iam:CreateServiceLinkedRole",
           "iam:GetRole",
           "iam:ListAttachedRolePolicies",
-          "iam:PassRole"
+          "iam:PassRole",
+          "sts:AssumeRole"
         ]
         Resource = "*"
       },
       {
-        Effect = "Allow"
-        Action = [
+        Effect   = "Allow"
+        Action   = [
           # Additional permissions for cluster management
           "ec2:DescribeSubnets",
           "ec2:DescribeVpcs",
           "ec2:DescribeSecurityGroups",
           "ec2:DescribeRouteTables",
           "ec2:DescribeNetworkInterfaces",
-          "ec2:DescribeInternetGateways"
+          "ec2:DescribeInternetGateways",
+          "elasticloadbalancing:DescribeLoadBalancers",
+          "elasticloadbalancing:DescribeTargetGroups",
+          "elasticloadbalancing:DescribeListeners",
+          "elasticloadbalancing:DescribeRules"
+        ]
+        Resource = "*"
+      },
+      {
+        Effect   = "Allow"
+        Action   = [
+          # S3 bucket access for ArgoCD
+          "s3:ListBucket",
+          "s3:GetObject",
+          "s3:PutObject",
+          "s3:DeleteObject"
         ]
         Resource = "*"
       }
@@ -87,8 +103,8 @@ resource "aws_iam_role" "github_actions" {
     Version = "2012-10-17"
     Statement = [
       {
-        Action = "sts:AssumeRoleWithWebIdentity"
-        Effect = "Allow"
+        Action    = "sts:AssumeRoleWithWebIdentity"
+        Effect    = "Allow"
         Principal = {
           Federated = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:oidc-provider/token.actions.githubusercontent.com"
         }
