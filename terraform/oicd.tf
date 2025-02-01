@@ -1,16 +1,21 @@
 data "aws_caller_identity" "current" {}
 
+resource "aws_iam_openid_connect_provider" "github_actions" {
+  url             = "https://token.actions.githubusercontent.com"
+  client_id_list  = ["sts.amazonaws.com"]
+  thumbprint_list = ["6938fd4d98bab03faadb97b34396831e3780aea1"]
+}
+
 resource "aws_iam_policy" "ecr_eks_argocd_access" {
   name        = "ECREKSArgoCDAccessPolicy"
   description = "Policy for GitHub Actions to interact with ECR, EKS, and ArgoCD"
 
   policy = jsonencode({
-    Version = "2012-10-17"
+    Version   = "2012-10-17"
     Statement = [
       {
         Effect   = "Allow"
         Action   = [
-          # ECR full access permissions
           "ecr:GetAuthorizationToken",
           "ecr:BatchCheckLayerAvailability",
           "ecr:CompleteLayerUpload",
@@ -31,7 +36,6 @@ resource "aws_iam_policy" "ecr_eks_argocd_access" {
       {
         Effect   = "Allow"
         Action   = [
-          # EKS cluster management
           "eks:DescribeCluster",
           "eks:ListClusters",
           "eks:AccessKubernetesApi",
@@ -54,7 +58,6 @@ resource "aws_iam_policy" "ecr_eks_argocd_access" {
       {
         Effect   = "Allow"
         Action   = [
-          # IAM permissions for EKS and ArgoCD
           "iam:CreateServiceLinkedRole",
           "iam:GetRole",
           "iam:ListAttachedRolePolicies",
@@ -66,7 +69,6 @@ resource "aws_iam_policy" "ecr_eks_argocd_access" {
       {
         Effect   = "Allow"
         Action   = [
-          # Additional permissions for cluster management
           "ec2:DescribeSubnets",
           "ec2:DescribeVpcs",
           "ec2:DescribeSecurityGroups",
@@ -83,7 +85,6 @@ resource "aws_iam_policy" "ecr_eks_argocd_access" {
       {
         Effect   = "Allow"
         Action   = [
-          # S3 bucket access for ArgoCD
           "s3:ListBucket",
           "s3:GetObject",
           "s3:PutObject",
@@ -95,18 +96,17 @@ resource "aws_iam_policy" "ecr_eks_argocd_access" {
   })
 }
 
-# Create IAM role for GitHub Actions
 resource "aws_iam_role" "github_actions" {
   name = "github-actions-eks-role"
 
   assume_role_policy = jsonencode({
-    Version = "2012-10-17"
+    Version   = "2012-10-17"
     Statement = [
       {
         Action    = "sts:AssumeRoleWithWebIdentity"
         Effect    = "Allow"
         Principal = {
-          Federated = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:oidc-provider/token.actions.githubusercontent.com"
+          Federated = aws_iam_openid_connect_provider.github_actions.arn
         }
         Condition = {
           StringLike = {
@@ -121,7 +121,6 @@ resource "aws_iam_role" "github_actions" {
   })
 }
 
-# Attach the policy to the role
 resource "aws_iam_role_policy_attachment" "github_actions_attachment" {
   role       = aws_iam_role.github_actions.name
   policy_arn = aws_iam_policy.ecr_eks_argocd_access.arn
