@@ -1,7 +1,3 @@
-Certainly! Below is the updated `README.md` file tailored to reflect the GitHub Actions workflow with two branches (`main` and `stage`). The `stage` branch performs a dry run (plan only), while the `main` branch applies the Terraform configuration to create or update resources.
-
----
-
 # GitOps Terraform for Amazon EKS Cluster
 
 This repository contains Terraform configurations to deploy an Amazon Elastic Kubernetes Service (EKS) cluster using Infrastructure as Code (IaC). The deployment process is triggered via GitHub Actions, with two branches configured:
