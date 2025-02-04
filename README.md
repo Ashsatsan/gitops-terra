@@ -123,8 +123,33 @@ Contributions are welcome! To contribute:
 
 ---
 
+## Aws Resources
+
+![image alt](https://github.com/Ashsatsan/gitops-terra/blob/main/images/terra1.png?raw=true)
+
+
+![image alt](https://github.com/Ashsatsan/gitops-terra/blob/main/images/terra2.png?raw=true)
+
+
+![image alt](https://github.com/Ashsatsan/gitops-terra/blob/main/images/terra3.png?raw=true)
+
+
+![image alt](https://github.com/Ashsatsan/gitops-terra/blob/main/images/terra4.png?raw=true)
+
+
+![image alt](https://github.com/Ashsatsan/gitops-terra/blob/main/images/terra5.png?raw=true)
+
+
+![image alt](https://github.com/Ashsatsan/gitops-terra/blob/main/images/terra6.png?raw=true)
+
+
+
+
+
+
+
 For any questions or issues, please open an issue in the repository.
 
 ---
 
-##Aws Resources
+
