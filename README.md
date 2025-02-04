@@ -78,7 +78,7 @@ The GitHub Actions workflow is defined in `.github/workflows/gitops-terraform.ym
   - Used for production deployments.
   - After validating changes in the `stage` branch, merge them into `main`.
   - Resources are created or updated in AWS when changes are pushed to this branch.
-
+    
 ---
 
 ## Deployment Instructions
@@ -110,7 +110,8 @@ The GitHub Actions workflow is defined in `.github/workflows/gitops-terraform.ym
 1. **Least Privilege**: IAM roles and policies are scoped to the minimum required permissions.
 2. **Secrets Management**: Use GitHub Actions secrets to securely store AWS credentials.
 3. **State File Encryption**: Enable server-side encryption for the S3 bucket storing Terraform state files.
-
+   ![image alt](https://github.com/Ashsatsan/gitops-terra/blob/main/images/terra7.png?raw=true)
+   
 ---
 
 ## Contributing
@@ -125,21 +126,22 @@ Contributions are welcome! To contribute:
 
 ## Aws Resources
 
-![image alt](https://github.com/Ashsatsan/gitops-terra/blob/main/images/terra1.png?raw=true)
-
-
+1.Here, Terraform created a secured vpc with private network connection(using NAT GATEWAY)
 ![image alt](https://github.com/Ashsatsan/gitops-terra/blob/main/images/terra2.png?raw=true)
 
+2.Then EKS cluster is created with the compute of 2 nodes within the vpc
+![image alt](https://github.com/Ashsatsan/gitops-terra/blob/main/images/terra1.png?raw=true)
 
+3.Instead of giving full permission minimum priviledge is given wih the help of oicd via terraform for the aws console to the gitops-build repository which will eventually perform cicd
 ![image alt](https://github.com/Ashsatsan/gitops-terra/blob/main/images/terra3.png?raw=true)
 
-
+4.AWS Security Token Service (STS), which is a web service that enables you to request temporary, limited-privilege credentials for AWS resources
 ![image alt](https://github.com/Ashsatsan/gitops-terra/blob/main/images/terra4.png?raw=true)
 
-
+5.For assurance that role consider the policy we created from the terraform IaC 
 ![image alt](https://github.com/Ashsatsan/gitops-terra/blob/main/images/terra5.png?raw=true)
 
-
+6.Inside the trust relationship of the given role check if the AWS security token is adhered
 ![image alt](https://github.com/Ashsatsan/gitops-terra/blob/main/images/terra6.png?raw=true)
 
 
