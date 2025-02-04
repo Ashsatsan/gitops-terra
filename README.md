@@ -1,189 +1,131 @@
-# GitOps Infrastructure & CI/CD Automation
-
-This repository demonstrates an end-to-end GitOps pipeline that automates the deployment of applications on AWS using Terraform to provision infrastructure (VPC, EKS, IAM, and OIDC) and GitHub Actions (integrated with ArgoCD and other tools) for CI/CD. This project is designed for interview demonstrations and real-world implementations, showcasing best practices in infrastructure as code and continuous deployment.
+Certainly! Below is the updated `README.md` file tailored to reflect the GitHub Actions workflow with two branches (`main` and `stage`). The `stage` branch performs a dry run (plan only), while the `main` branch applies the Terraform configuration to create or update resources.
 
 ---
 
+# GitOps Terraform for Amazon EKS Cluster
+
+This repository contains Terraform configurations to deploy an Amazon Elastic Kubernetes Service (EKS) cluster using Infrastructure as Code (IaC). The deployment process is triggered via GitHub Actions, with two branches configured:
+
+- **`stage`**: Performs a dry run (`terraform plan`) to validate changes.
+- **`main`**: Applies the Terraform configuration (`terraform apply`) to create or update resources.
+
 ## Table of Contents
 
-- [Overview](#overview)
-- [Repository Structure](#repository-structure)
-- [Infrastructure Components](#infrastructure-components)
-  - [EKS Cluster](#eks-cluster)
-  - [VPC Setup](#vpc-setup)
-  - [IAM and OIDC Configuration](#iam-and-oidc-configuration)
-- [Terraform Files Explanation](#terraform-files-explanation)
-- [Setup & Deployment Steps](#setup--deployment-steps)
-- [Expected AWS Console Outputs](#expected-aws-console-outputs)
-- [Troubleshooting](#troubleshooting)
-- [Conclusion](#conclusion)
+1. [Overview](#overview)
+2. [Prerequisites](#prerequisites)
+3. [GitHub Actions Workflow](#github-actions-workflow)
+4. [Branching Strategy](#branching-strategy)
+5. [Deployment Instructions](#deployment-instructions)
+6. [Security Considerations](#security-considerations)
+7. [Contributing](#contributing)
 
 ---
 
 ## Overview
 
-This project uses Terraform to build an AWS EKS cluster with supporting infrastructure including a VPC, subnets, and networking components. In addition, the project configures an OIDC provider with GitHub Actions, sets up an IAM policy and role for secure interaction with AWS services (ECR, EKS, EC2, etc.), and attaches the necessary policies. The repository is split into modules that handle distinct aspects of the infrastructure:
+This project automates the creation of an Amazon EKS cluster using Terraform. It includes:
 
-- **Infrastructure Provisioning (`gitops-terra`)**: Contains Terraform code to set up AWS resources.
-- **Application Build & Deployment (`gitops-build`)**: Contains CI/CD workflows (integrated with GitHub Actions, Maven, Docker, ArgoCD, etc.) to build, test, and deploy applications.
-
----
-
-## Repository Structure
-
-. ├── eks-cluster.tf # Defines the EKS cluster using terraform-aws-modules/eks/aws ├── main.tf # Contains AWS and Kubernetes provider configurations ├── output.tf # Outputs key variables such as the cluster name, endpoint, region, and security group ID ├── terraform.tf # Configures required Terraform providers and the S3 backend for state management ├── variables.tf # Declares variables for AWS region, cluster name, GitHub organization, and repository ├── vpc.tf # Sets up a VPC with public and private subnets using terraform-aws-modules/vpc/aws └── oidc.tf # Configures OIDC provider and IAM policies/roles for GitHub Actions to interact with AWS resources
-
-markdown
-Copy
-Edit
+- **EKS Cluster**: Configured with two managed node groups.
+- **VPC and Networking**: A Virtual Private Cloud (VPC) with private subnets for the EKS cluster.
+- **IAM Roles and Policies**: IAM roles and policies for GitHub Actions to interact with AWS services like ECR, EKS, and ArgoCD.
+- **OpenID Connect (OIDC)**: OIDC provider for secure GitHub Actions integration.
+- **CI/CD Workflow**: GitHub Actions workflow to trigger Terraform commands based on branch (`stage` for dry runs, `main` for applying changes).
 
 ---
 
-## Infrastructure Components
+## Prerequisites
 
-### EKS Cluster
+Before deploying the infrastructure, ensure the following prerequisites are met:
 
-- **eks-cluster.tf**: Uses the official Terraform AWS EKS module to create an EKS cluster with the following specifications:
-  - **Cluster Version:** 1.27
-  - **Managed Node Groups:** Two managed node groups are configured:
-    - **node-group-1:** Uses `t3.small` instances (desired capacity: 2, with scaling between 1 and 3).
-    - **node-group-2:** Uses `t3.small` instances (desired capacity: 1, with scaling between 1 and 2).
-  - **Networking:** The cluster is deployed in private subnets (sourced from the VPC module).
-
-### VPC Setup
-
-- **vpc.tf**: Utilizes the `terraform-aws-modules/vpc/aws` module to create a dedicated VPC:
-  - **CIDR Block:** 172.20.0.0/16
-  - **Subnets:** 3 private and 3 public subnets are defined.
-  - **NAT Gateway:** Configured with a single NAT Gateway for cost efficiency.
-  - **Tags:** Kubernetes-specific tags are added to both public and private subnets for proper resource association with the EKS cluster.
-
-### IAM and OIDC Configuration
-
-- **oidc.tf**:
-  - **OIDC Provider:** Creates an IAM OIDC provider for GitHub Actions (`https://token.actions.githubusercontent.com`) allowing secure, federated access.
-  - **IAM Policy:** Defines a custom policy (`ECREKSArgoCDAccessPolicy`) granting permissions to interact with ECR, EKS, IAM, EC2, and S3.
-  - **IAM Role:** Creates an IAM role (`github-actions-eks-role`) that GitHub Actions can assume using web identity federation. The role’s assume policy is configured with conditions to restrict access to the specified GitHub organization and repository.
-  - **Policy Attachment:** Attaches the IAM policy to the GitHub Actions role.
+1. **AWS Account**: An active AWS account with sufficient permissions to create EKS clusters, VPCs, IAM roles, and other resources.
+2. **Terraform Installed**: Install Terraform locally or use a CI/CD pipeline to run Terraform commands.
+   - Download Terraform: [https://www.terraform.io/downloads.html](https://www.terraform.io/downloads.html)
+3. **AWS CLI**: Install and configure the AWS CLI with appropriate credentials.
+   - Installation Guide: [https://docs.aws.amazon.com/cli/latest/userguide/install-cliv2.html](https://docs.aws.amazon.com/cli/latest/userguide/install-cliv2.html)
+4. **GitHub Repository**: Fork this repository and configure GitHub Actions secrets for AWS credentials.
+5. **S3 Bucket**: An S3 bucket named `gitiopsbob` in the `us-east-2` region to store Terraform state files.
 
 ---
 
-## Terraform Files Explanation
+## GitHub Actions Workflow
 
-- **main.tf**
-  - Configures the AWS provider (region defined in `variables.tf`).
-  - Sets up the Kubernetes provider using the EKS cluster endpoint and certificate authority data.
-  
-- **terraform.tf**
-  - Specifies required Terraform providers (aws, random, tls, cloudinit, kubernetes).
-  - Configures the S3 backend for storing Terraform state (bucket: `gitiopsbob`, key: `terraform.tfstate`).
+The GitHub Actions workflow is defined in `.github/workflows/gitops-terraform.yml`. It supports two branches:
 
-- **variables.tf**
-  - Declares variables such as `region`, `clusterName`, `github_org`, and `github_repo`. Validation rules ensure that the GitHub organization and repository values match the expected names.
+### 1. `stage` Branch
+- **Purpose**: Validates changes without applying them.
+- **Steps**:
+  - Runs `terraform init`, `terraform fmt`, `terraform validate`, and `terraform plan`.
+  - Outputs the Terraform plan for review.
+  - Does not apply changes to AWS resources.
 
-- **output.tf**
-  - Exposes key outputs (cluster name, endpoint, region, and cluster security group ID) that can be referenced by other applications or modules.
-
-- **eks-cluster.tf**
-  - Uses the Terraform AWS EKS module to define the cluster, node groups, and related configurations.
-  - References the VPC module to integrate networking components.
-
-- **vpc.tf**
-  - Defines the VPC, subnets, NAT gateway, and associated tags that help with resource discovery in the AWS console.
-  
-- **oidc.tf**
-  - Creates the IAM OIDC provider for GitHub Actions.
-  - Creates and attaches the necessary IAM policies and roles for allowing GitHub Actions secure access to AWS resources.
+### 2. `main` Branch
+- **Purpose**: Applies changes to AWS resources.
+- **Steps**:
+  - Runs all steps from the `stage` branch.
+  - Executes `terraform apply` to create or update resources.
+  - Configures AWS CLI for `kubectl` interaction with the EKS cluster.
+  - Optionally installs an ingress controller.
 
 ---
 
-## Setup & Deployment Steps
+## Branching Strategy
 
-1. **Clone the Repository:**
+- **`stage` Branch**:
+  - Used for testing and validation.
+  - Changes are pushed to this branch to perform a dry run (`terraform plan`).
+  - No resources are created or modified in AWS.
 
+- **`main` Branch**:
+  - Used for production deployments.
+  - After validating changes in the `stage` branch, merge them into `main`.
+  - Resources are created or updated in AWS when changes are pushed to this branch.
+
+---
+
+## Deployment Instructions
+
+### 1. Push to `stage` Branch
+1. Make changes to your Terraform configuration.
+2. Push the changes to the `stage` branch:
    ```bash
-   git clone https://github.com/your-username/gitops-terra.git
-   cd gitops-terra
-Configure AWS Credentials:
+   git checkout stage
+   git add .
+   git commit -m "Add/update Terraform configuration"
+   git push origin stage
+   ```
+3. Monitor the GitHub Actions workflow for the `stage` branch to ensure the plan succeeds.
 
-Ensure that your AWS CLI is configured with the appropriate credentials and permissions:
+### 2. Merge to `main` Branch
+1. Once the `stage` branch plan succeeds, merge the changes into `main`:
+   ```bash
+   git checkout main
+   git merge stage
+   git push origin main
+   ```
+2. Monitor the GitHub Actions workflow for the `main` branch to ensure the apply succeeds.
 
-bash
-Copy
-Edit
-aws configure
-Terraform Initialization:
+---
 
-Initialize the Terraform working directory to download required modules and providers:
+## Security Considerations
 
-bash
-Copy
-Edit
-terraform init
-Plan the Deployment:
+1. **Least Privilege**: IAM roles and policies are scoped to the minimum required permissions.
+2. **Secrets Management**: Use GitHub Actions secrets to securely store AWS credentials.
+3. **State File Encryption**: Enable server-side encryption for the S3 bucket storing Terraform state files.
 
-Generate an execution plan to preview the changes:
+---
 
-bash
-Copy
-Edit
-terraform plan -out=tfplan
-Apply the Configuration:
+## Contributing
 
-Apply the changes to your AWS environment:
+Contributions are welcome! To contribute:
 
-bash
-Copy
-Edit
-terraform apply tfplan
-Verify AWS Resources:
+1. Fork the repository.
+2. Create a new branch for your changes.
+3. Submit a pull request with a detailed description of your changes.
 
-After a successful apply, verify the following in the AWS console:
+---
 
-VPC and Subnets: Confirm that the VPC, public, and private subnets are created with the correct CIDR ranges and tags.
-EKS Cluster: Check the EKS dashboard for your cluster (vprofile1-eks) along with the node groups.
-OIDC Provider & IAM Role: Under IAM, review the OIDC provider (token.actions.githubusercontent.com) and the GitHub Actions role (github-actions-eks-role) with attached policies.
-Expected AWS Console Outputs
-Below are example screenshots from the AWS console after deployment:
+For any questions or issues, please open an issue in the repository.
 
-VPC Console:
+---
 
-
-EKS Cluster:
-
-
-OIDC Provider:
-
-
-IAM Role:
-
-
-Note: Replace the image paths with your actual image filenames as they appear in your project.
-
-Troubleshooting
-Terraform Execution Issues
-AWS Credentials:
-
-Problem: Terraform cannot authenticate with AWS.
-Solution: Verify your AWS credentials (aws configure) and ensure that the credentials have the necessary permissions for VPC, EKS, IAM, and related resources.
-Module Version Conflicts:
-
-Problem: Module versions might conflict or be unavailable.
-Solution: Double-check the versions specified in your Terraform files. Run terraform init -upgrade to update modules and providers.
-S3 Backend Errors:
-
-Problem: Issues with remote state (e.g., permission denied or missing bucket).
-Solution: Ensure the S3 bucket (gitiopsbob) exists and that your IAM user has permissions to access the bucket. Confirm the bucket region and key are correctly specified.
-GitHub Actions and CI/CD Pipeline
-OIDC Role Assumption:
-
-Problem: GitHub Actions workflows fail to assume the IAM role.
-Solution: Ensure the OIDC provider is correctly configured, and the trust relationship in the IAM role restricts access only to the specified repository (gitops-argocd) and organization (Ashsatsan).
-CI/CD Deployment Failures:
-
-Problem: Application deployment fails during build or sync.
-Solution: Check logs from Maven, Docker build, and ArgoCD sync. Validate that Docker images are successfully pushed to ECR and that ArgoCD is configured to track the correct repository and branch.
-Conclusion
-This GitOps project demonstrates the automation of AWS infrastructure and CI/CD pipelines using Terraform, GitHub Actions, and associated cloud-native tools. The code is modular and organized to promote reusability and scalability. By following the provided steps, you can deploy a secure, production-ready environment that integrates AWS EKS with GitHub Actions for continuous delivery.
-
-Feel free to reach out for further details or clarifications. Best of luck with your interview demonstration!
+This updated `README.md` provides a clear explanation of the branching strategy and how the GitHub Actions workflow operates for both `stage` and `main` branches. It ensures that users understand the purpose of each branch and how to use them effectively for testing and production deployments.
