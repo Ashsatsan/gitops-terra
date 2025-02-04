@@ -14,6 +14,7 @@ This repository contains Terraform configurations to deploy an Amazon Elastic Ku
 5. [Deployment Instructions](#deployment-instructions)
 6. [Security Considerations](#security-considerations)
 7. [Contributing](#contributing)
+8. [Aws Resources](#Aws-Resources)
 
 ---
 
@@ -31,7 +32,9 @@ This project automates the creation of an Amazon EKS cluster using Terraform. It
 
 ## Prerequisites
 
-Before deploying the infrastructure, ensure the following prerequisites are met:
+Before deploying the infrastructure, ensure the following prerequisites are met(if applying locally):
+(Although this project does not require any installation if its done via github directly because even a slighest change into the repository will trigger the workflow and github actions will perform the mentioned task
+which already has the terraform inbuilt in it)
 
 1. **AWS Account**: An active AWS account with sufficient permissions to create EKS clusters, VPCs, IAM roles, and other resources.
 2. **Terraform Installed**: Install Terraform locally or use a CI/CD pipeline to run Terraform commands.
@@ -124,4 +127,4 @@ For any questions or issues, please open an issue in the repository.
 
 ---
 
-This updated `README.md` provides a clear explanation of the branching strategy and how the GitHub Actions workflow operates for both `stage` and `main` branches. It ensures that users understand the purpose of each branch and how to use them effectively for testing and production deployments.
+##Aws Resources
