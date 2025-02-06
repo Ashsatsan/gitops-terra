@@ -8,6 +8,10 @@ This repository contains Terraform configurations to deploy an Amazon Elastic Ku
 - **`stage`**: Performs a dry run (`terraform plan`) to validate changes.
 - **`main`**: Applies the Terraform configuration (`terraform apply`) to create or update resources.
 
+## IMPORTANT NOTE:
+This project is just the Iac part of the project to properly execute the whole part of the project, after performing this follow the reference repository:
+[gitops-argocd](https://github.com/Ashsatsan/gitops-argocd)
+
 ## Table of Contents
 
 1. [Overview](#overview)
