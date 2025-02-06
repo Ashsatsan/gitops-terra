@@ -130,21 +130,27 @@ Contributions are welcome! To contribute:
 ## Aws Resources
 
 1.Here, Terraform created a secured vpc with private network connection(using NAT GATEWAY)
+
 ![image alt](https://github.com/Ashsatsan/gitops-terra/blob/main/images/terra2.png?raw=true)
 
 2.Then EKS cluster is created with the compute of 2 nodes within the vpc
+
 ![image alt](https://github.com/Ashsatsan/gitops-terra/blob/main/images/terra1.png?raw=true)
 
 3.Instead of giving full permission minimum priviledge is given wih the help of oicd via terraform for the aws console to the gitops-build repository which will eventually perform cicd
+
 ![image alt](https://github.com/Ashsatsan/gitops-terra/blob/main/images/terra3.png?raw=true)
 
 4.AWS Security Token Service (STS), which is a web service that enables you to request temporary, limited-privilege credentials for AWS resources
+
 ![image alt](https://github.com/Ashsatsan/gitops-terra/blob/main/images/terra4.png?raw=true)
 
 5.For assurance that role consider the policy we created from the terraform IaC 
+
 ![image alt](https://github.com/Ashsatsan/gitops-terra/blob/main/images/terra5.png?raw=true)
 
 6.Inside the trust relationship of the given role check if the AWS security token is adhered
+
 ![image alt](https://github.com/Ashsatsan/gitops-terra/blob/main/images/terra6.png?raw=true)
 
 
@@ -153,7 +159,7 @@ Contributions are welcome! To contribute:
 
 
 
-For any questions or issues, please open an issue in the repository.
+
 
 ---
 
