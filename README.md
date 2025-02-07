@@ -1,6 +1,6 @@
 # GitOps Terraform for Amazon EKS Cluster (IaC PART OF THE PROJECT)
 
-![image alt](https://github.com/Ashsatsan/gitops-terra/blob/main/images/PHASE1.png?raw=true)
+![image alt](https://github.com/Ashsatsan/gitops-terra/blob/main/images/updated%20argocd%20-%20Copy.png?raw=true)
 
 
 This repository contains Terraform configurations to deploy an Amazon Elastic Kubernetes Service (EKS) cluster using Infrastructure as Code (IaC). The deployment process is triggered via GitHub Actions, with two branches configured:
